@@ -2,4 +2,7 @@ module github.com/tengolang/tengo-modules
 
 go 1.25.3
 
-require github.com/tengolang/tengo/v3 v3.6.0 // indirect
+require (
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/tengolang/tengo/v3 v3.6.0 // indirect
+)

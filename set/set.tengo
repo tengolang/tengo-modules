@@ -1,0 +1,88 @@
+// _key produces a stable map key for v that includes its type, so int(1)
+// and string("1") do not collide.
+_key := func(v) {
+    return type_name(v) + ":" + string(v)
+}
+
+export {
+    // from returns a deduplicated copy of arr with elements in first-seen order.
+    from: func(arr) {
+        seen := {}
+        out := []
+        for v in arr {
+            k := _key(v)
+            if !seen[k] {
+                seen[k] = true
+                out = append(out, v)
+            }
+        }
+        return out
+    },
+
+    // contains reports whether val is present in arr.
+    contains: func(arr, val) {
+        k := _key(val)
+        for v in arr {
+            if _key(v) == k { return true }
+        }
+        return false
+    },
+
+    // union returns all unique elements from a and b, preserving first-seen order.
+    union: func(a, b) {
+        seen := {}
+        out := []
+        for v in a {
+            k := _key(v)
+            if !seen[k] { seen[k] = true; out = append(out, v) }
+        }
+        for v in b {
+            k := _key(v)
+            if !seen[k] { seen[k] = true; out = append(out, v) }
+        }
+        return out
+    },
+
+    // intersect returns elements present in both a and b (order from a).
+    intersect: func(a, b) {
+        bm := {}
+        for v in b { bm[_key(v)] = true }
+        seen := {}
+        out := []
+        for v in a {
+            k := _key(v)
+            if bm[k] && !seen[k] {
+                seen[k] = true
+                out = append(out, v)
+            }
+        }
+        return out
+    },
+
+    // difference returns elements in a that are not in b.
+    difference: func(a, b) {
+        bm := {}
+        for v in b { bm[_key(v)] = true }
+        seen := {}
+        out := []
+        for v in a {
+            k := _key(v)
+            if !bm[k] && !seen[k] {
+                seen[k] = true
+                out = append(out, v)
+            }
+        }
+        return out
+    },
+
+    // equal reports whether a and b contain the same elements, regardless of order.
+    equal: func(a, b) {
+        if len(a) != len(b) { return false }
+        bm := {}
+        for v in b { bm[_key(v)] = true }
+        for v in a {
+            if !bm[_key(v)] { return false }
+        }
+        return true
+    },
+}
