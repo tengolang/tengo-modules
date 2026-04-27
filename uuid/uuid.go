@@ -19,8 +19,8 @@ var Module = map[string]tengo.Object{
 	"v4": &tengo.UserFunction{
 		Name: "v4",
 		Value: func(args ...tengo.Object) (tengo.Object, error) {
-			if len(args) != 0 {
-				return nil, tengo.ErrWrongNumArguments
+			if err := tengo.ArgCount(args, 0); err != nil {
+				return nil, err
 			}
 			return &tengo.String{Value: uuid.New().String()}, nil
 		},
@@ -29,8 +29,8 @@ var Module = map[string]tengo.Object{
 	"v1": &tengo.UserFunction{
 		Name: "v1",
 		Value: func(args ...tengo.Object) (tengo.Object, error) {
-			if len(args) != 0 {
-				return nil, tengo.ErrWrongNumArguments
+			if err := tengo.ArgCount(args, 0); err != nil {
+				return nil, err
 			}
 			id, err := uuid.NewUUID()
 			if err != nil {
@@ -43,16 +43,12 @@ var Module = map[string]tengo.Object{
 	"parse": &tengo.UserFunction{
 		Name: "parse",
 		Value: func(args ...tengo.Object) (tengo.Object, error) {
-			if len(args) != 1 {
-				return nil, tengo.ErrWrongNumArguments
+			if err := tengo.ArgCount(args, 1); err != nil {
+				return nil, err
 			}
-			s, ok := tengo.ToString(args[0])
-			if !ok {
-				return nil, tengo.ErrInvalidArgumentType{
-					Name:     "s",
-					Expected: "string",
-					Found:    args[0].TypeName(),
-				}
+			s, err := tengo.ArgString(args, 0, "s")
+			if err != nil {
+				return nil, err
 			}
 			id, err := uuid.Parse(s)
 			if err != nil {
@@ -65,19 +61,14 @@ var Module = map[string]tengo.Object{
 	"valid": &tengo.UserFunction{
 		Name: "valid",
 		Value: func(args ...tengo.Object) (tengo.Object, error) {
-			if len(args) != 1 {
-				return nil, tengo.ErrWrongNumArguments
+			if err := tengo.ArgCount(args, 1); err != nil {
+				return nil, err
 			}
-			s, ok := tengo.ToString(args[0])
-			if !ok {
-				return nil, tengo.ErrInvalidArgumentType{
-					Name:     "s",
-					Expected: "string",
-					Found:    args[0].TypeName(),
-				}
-			}
-			_, err := uuid.Parse(s)
+			s, err := tengo.ArgString(args, 0, "s")
 			if err != nil {
+				return nil, err
+			}
+			if _, err := uuid.Parse(s); err != nil {
 				return tengo.FalseValue, nil
 			}
 			return tengo.TrueValue, nil
